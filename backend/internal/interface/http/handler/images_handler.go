@@ -2,7 +2,7 @@ package handler
 
 import (
 	"backend/ops/db"
-	"backend/pkg/images"
+	"backend/pkg/media"
 	"backend/utils"
 	"encoding/json"
 	"fmt"
@@ -76,7 +76,7 @@ func (h *ImageHandler) HandleImagesImport(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var imagesList []images.Flyer
+	var imagesList []media.Flyer
 	result := dbConn.Find(&imagesList)
 	if result.Error != nil {
 		log.Printf("Error fetching images from DB: %v", result.Error)
@@ -85,7 +85,7 @@ func (h *ImageHandler) HandleImagesImport(w http.ResponseWriter, r *http.Request
 	}
 
 	// Generate images metadata JSON
-	flyers := images.Flyers{Flyers: imagesList} // Wrap the images in Flyers
+	flyers := media.Flyers{Flyers: imagesList} // Wrap the images in Flyers
 	if err := utils.ImagesToJson(flyers); err != nil {
 		log.Printf("Error creating images metadata JSON: %v", err)
 		http.Error(w, "Failed to update images metadata", http.StatusInternalServerError)
@@ -146,7 +146,7 @@ func (h *ImageHandler) processImageFile(importDir, filename string) error {
 }
 
 // Inserts an image record into the database
-func dbInsertImage(dbConn *gorm.DB, flyer *images.Flyer) (uint, error) {
+func dbInsertImage(dbConn *gorm.DB, flyer *media.Flyer) (uint, error) {
 	result := dbConn.Create(flyer)
 	if result.Error != nil {
 		return 0, fmt.Errorf("failed to insert image: %w", result.Error)
@@ -156,18 +156,18 @@ func dbInsertImage(dbConn *gorm.DB, flyer *images.Flyer) (uint, error) {
 }
 
 // Converts an image file into a Flyer object
-func convertToJson(filePath, filename string) (images.Flyer, error) {
+func convertToJson(filePath, filename string) (media.Flyer, error) {
 	S3BUCKET_NAME := os.Getenv("S3_BUCKET_NAME")
 
 	imgFile, err := os.Open(filePath)
 	if err != nil {
-		return images.Flyer{}, fmt.Errorf("failed to read uploaded image: %v", err)
+		return media.Flyer{}, fmt.Errorf("failed to read uploaded image: %v", err)
 	}
 	defer imgFile.Close()
 
 	img, format, err := image.Decode(imgFile)
 	if err != nil {
-		return images.Flyer{}, fmt.Errorf("failed to decode image: %v", err)
+		return media.Flyer{}, fmt.Errorf("failed to decode image: %v", err)
 	}
 
 	width := img.Bounds().Dx()
@@ -183,19 +183,19 @@ func convertToJson(filePath, filename string) (images.Flyer, error) {
 		orientation = "landscape"
 	}
 
-	flyer := images.Flyer{
-		Design: images.Design{
+	flyer := media.Flyer{
+		Design: media.Design{
 			TemplateId: "", // Add template logic if needed
-			Resolution: images.Resolution{
+			Resolution: media.Resolution{
 				Width:  width,
 				Height: height,
 				Unit:   1, // Assuming pixels
 			},
 			Type:        "image",
-			Tags:        extractImageTags(filename),
-			FileFormat:  fileFormat,
+			Tags:        utils.LowerSlice(extractImageTags(filename)),
+			FileFormat:  strings.ToLower(fileFormat),
 			Orientation: orientation,
-			FileName: filename,
+			FileName:    filename,
 		},
 		Lang: "en-US",
 		Url:  fmt.Sprintf("%s/%s", S3BUCKET_NAME, filename), // Temporary URL before DB ID is added
@@ -241,7 +241,7 @@ func (h *ImageHandler) HandleImagesUpload(w http.ResponseWriter, r *http.Request
 	}
 
 	// Create a Flyer object
-	flyer := images.Flyer{
+	flyer := media.Flyer{
 		Url: fmt.Sprintf("%s/%s", os.Getenv("S3_BUCKET_NAME"), handler.Filename), // Temporary URL
 		// Add other fields as necessary
 	}
@@ -268,7 +268,7 @@ func (h *ImageHandler) HandleImagesUpload(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var imagesList []images.Flyer
+	var imagesList []media.Flyer
 	result := dbConn.Find(&imagesList)
 	if result.Error != nil {
 		log.Printf("Error fetching images from DB: %v", result.Error)
@@ -277,7 +277,7 @@ func (h *ImageHandler) HandleImagesUpload(w http.ResponseWriter, r *http.Request
 	}
 
 	// Generate images metadata JSON
-	flyers := images.Flyers{Flyers: imagesList} // Wrap the images in Flyers
+	flyers := media.Flyers{Flyers: imagesList} // Wrap the images in Flyers
 	if err := utils.ImagesToJson(flyers); err != nil {
 		log.Printf("Error creating images metadata JSON: %v", err)
 		http.Error(w, "Failed to update images metadata", http.StatusInternalServerError)

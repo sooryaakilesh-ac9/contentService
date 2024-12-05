@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backend/pkg/images"
+	"backend/pkg/media"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -22,7 +22,7 @@ type Flyer struct {
 }
 
 type Design struct {
-	TemplateId  string     `json:"templateId" gorm:"column:template_id"`
+	TemplateId  string     `json:"templateID" gorm:"column:template_id"`
 	Resolution  Resolution `json:"resolution" gorm:"embedded"`
 	Type        string     `json:"type"`
 	Tags        []string   `json:"tags" gorm:"serializer:json"`
@@ -45,12 +45,12 @@ type FlyersMetadata struct {
 }
 
 type MetaDataImages struct {
-	Images         []images.Flyer `json:"images"`
+	Images         []media.Flyer `json:"media"`
 	ImagesMetadata FlyersMetadata `json:"metadata"`
 }
 
 // ImagesToJson converts the flyer images to a JSON file with metadata
-func ImagesToJson(images images.Flyers) error {
+func ImagesToJson(images media.Flyers) error {
 	metadataPath := os.Getenv("IMAGE_METADATA_PATH")
 	metadataFileName := os.Getenv("IMAGE_METADATA_FILENAME")
 

@@ -1,12 +1,7 @@
-package handler
+package media
 
-import (
-	"backend/pkg/quotes"
-)
-
-type MetadataFlyers struct {
-	Flyers         []Flyer        `json:"flyers"`
-	FlyersMetadata FlyersMetadata `json:"metadata"`
+type Flyers struct {
+	Flyers []Flyer `json:"flyers"`
 }
 
 type Flyer struct {
@@ -23,6 +18,7 @@ type Design struct {
 	Tags        []string   `json:"tags" gorm:"serializer:json"`
 	FileFormat  string     `json:"fileFormat" gorm:"column:file_format"`
 	Orientation string     `json:"orientation"`
+	FileName    string     `json:"fileName" gorm:"column:fileName"`
 }
 
 type Resolution struct {
@@ -32,19 +28,8 @@ type Resolution struct {
 }
 
 type FlyersMetadata struct {
-	Version     string `json:"version"`
 	LastUpdated string `json:"lastUpdated"`
-	TotalFlyers int    `json:"total"`
+	TotalFlyers int    `json:"totalFlyers"`
 	Url         string `json:"url"`
-	Schema      Schema `json:"schema,omitempty"`
-}
-
-type MetaDataImages struct {
-	Images         []Flyer        `json:"images"`
-	ImagesMetadata FlyersMetadata `json:"metadata"`
-}
-
-type MetaDataQuotes struct {
-	Quotes         []quotes.Quote `json:"quotes"`
-	QuotesMetadata QuotesMetadata `json:"quotesMetadata"`
+	Version     uint `json:"version"`
 }

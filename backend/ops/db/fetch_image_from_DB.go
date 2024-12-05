@@ -1,14 +1,14 @@
 package db
 
 import (
-	"backend/pkg/images"
+	"backend/pkg/media"
 	"backend/utils"
 	"fmt"
 
 	"gorm.io/gorm"
 )
 
-func FetchImageFromDB(imageId uint) (*images.Flyer, error) {
+func FetchImageFromDB(imageId uint) (*media.Flyer, error) {
 	// Connect to the database
 	db, err := GetDB()
 	if err != nil {
@@ -16,7 +16,7 @@ func FetchImageFromDB(imageId uint) (*images.Flyer, error) {
 	}
 
 	// Declare a variable to hold the fetched image
-	var image images.Flyer
+	var image media.Flyer
 
 	// Fetch the image from the database by ID
 	if err := db.First(&image, imageId).Error; err != nil {
@@ -33,8 +33,8 @@ func FetchImageFromDB(imageId uint) (*images.Flyer, error) {
 	return &image, nil
 }
 
-func FetchAllImagesFromDB() ([]images.Flyer, error) {
-	var images []images.Flyer
+func FetchAllImagesFromDB() ([]media.Flyer, error) {
+	var images []media.Flyer
 
 	// Connect to the database
 	db, err := GetDB()

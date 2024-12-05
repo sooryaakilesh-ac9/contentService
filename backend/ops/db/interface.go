@@ -1,9 +1,10 @@
 package db
 
 import (
-	"backend/pkg/images"
+	"backend/pkg/media"
 	"backend/pkg/quotes"
 	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -13,9 +14,9 @@ type Database interface {
 	InsertQuote(quote quotes.Quote) error
 	FetchQuote(quoteId int) (*quotes.Quote, error)
 	FetchAllQuotes() ([]quotes.Quote, error)
-	InsertImage(flyer images.Flyer) (uint, error)
-	FetchImage(imageId uint) (*images.Flyer, error)
-	FetchAllImages() ([]images.Flyer, error)
+	InsertImage(flyer media.Flyer) (uint, error)
+	FetchImage(imageId uint) (*media.Flyer, error)
+	FetchAllImages() ([]media.Flyer, error)
 }
 
 type PostgresDB struct {
@@ -55,19 +56,19 @@ func (p *PostgresDB) FetchAllQuotes() ([]quotes.Quote, error) {
 	return quotes, err
 }
 
-func (p *PostgresDB) InsertImage(flyer images.Flyer) (uint, error) {
+func (p *PostgresDB) InsertImage(flyer media.Flyer) (uint, error) {
 	err := p.db.Create(&flyer).Error
 	return uint(flyer.Id), err
 }
 
-func (p *PostgresDB) FetchImage(imageId uint) (*images.Flyer, error) {
-	var flyer images.Flyer
+func (p *PostgresDB) FetchImage(imageId uint) (*media.Flyer, error) {
+	var flyer media.Flyer
 	err := p.db.First(&flyer, imageId).Error
 	return &flyer, err
 }
 
-func (p *PostgresDB) FetchAllImages() ([]images.Flyer, error) {
-	var flyers []images.Flyer
+func (p *PostgresDB) FetchAllImages() ([]media.Flyer, error) {
+	var flyers []media.Flyer
 	err := p.db.Find(&flyers).Error
 	return flyers, err
-} 
+}
